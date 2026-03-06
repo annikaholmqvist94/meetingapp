@@ -5,6 +5,7 @@ import org.example.meetingapp.dto.MeetingUpdateDto;
 import org.example.meetingapp.dto.MeetingViewDto;
 import org.example.meetingapp.entity.Meeting;
 import org.example.meetingapp.entity.MeetingStatus;
+import org.example.meetingapp.exception.ResourceNotFoundException;
 import org.example.meetingapp.mapper.MeetingMapper;
 import org.example.meetingapp.repository.MeetingRepository;
 import org.springframework.stereotype.Service;
@@ -104,10 +105,8 @@ public class MeetingService {
                 .toList();
     }
 
-    // Privat hjälpmetod
     private Meeting findMeetingOrThrow(Long id) {
         return meetingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Möte med id " + id + " hittades inte"));
+                .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 }
