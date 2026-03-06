@@ -1,6 +1,7 @@
 package org.example.meetingapp.mapper;
 
-import org.example.meetingapp.dto.MeetingFormDto;
+import org.example.meetingapp.dto.MeetingCreateDto;
+import org.example.meetingapp.dto.MeetingUpdateDto;
 import org.example.meetingapp.dto.MeetingViewDto;
 import org.example.meetingapp.entity.Meeting;
 import org.springframework.stereotype.Component;
@@ -22,16 +23,23 @@ public class MeetingMapper {
         );
     }
 
-    // FormDto → Entity (för att spara nytt möte)
-    public Meeting toEntity(MeetingFormDto dto) {
+    // CreateDto → Entity (för att spara nytt möte)
+    public Meeting toEntity(MeetingCreateDto dto) {
         Meeting meeting = new Meeting();
-        applyFormDto(meeting, dto);
+        meeting.setTitle(dto.getTitle());
+        meeting.setDescription(dto.getDescription());
+        meeting.setDate(dto.getDate());
+        meeting.setStartTime(dto.getStartTime());
+        meeting.setEndTime(dto.getEndTime());
+        meeting.setOrganizer(dto.getOrganizer());
+        meeting.setStatus(dto.getStatus());
         return meeting;
     }
 
-    // Entity → FormDto (för att fylla i formulär vid uppdatering)
-    public MeetingFormDto toFormDto(Meeting meeting) {
-        MeetingFormDto dto = new MeetingFormDto();
+    // Entity → UpdateDto (för att fylla i uppdateringsformulär)
+    public MeetingUpdateDto toUpdateDto(Meeting meeting) {
+        MeetingUpdateDto dto = new MeetingUpdateDto();
+        dto.setId(meeting.getId());
         dto.setTitle(meeting.getTitle());
         dto.setDescription(meeting.getDescription());
         dto.setDate(meeting.getDate());
@@ -42,13 +50,8 @@ public class MeetingMapper {
         return dto;
     }
 
-    // Uppdatera befintlig entity med formulärdata (för PUT/update)
-    public void updateEntityFromDto(Meeting meeting, MeetingFormDto dto) {
-        applyFormDto(meeting, dto);
-    }
-
-    // Privat hjälpmetod — undviker kodduplicering
-    private void applyFormDto(Meeting meeting, MeetingFormDto dto) {
+    // UpdateDto → uppdatera befintlig Entity
+    public void updateEntityFromDto(Meeting meeting, MeetingUpdateDto dto) {
         meeting.setTitle(dto.getTitle());
         meeting.setDescription(dto.getDescription());
         meeting.setDate(dto.getDate());
