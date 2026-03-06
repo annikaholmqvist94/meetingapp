@@ -5,7 +5,11 @@ import org.example.meetingapp.entity.MeetingStatus;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class MeetingFormDto {
+public class MeetingUpdateDto {
+
+    // Id behövs för att identifiera vilket möte som uppdateras
+    @NotNull(message = "Id måste anges")
+    private Long id;
 
     @NotBlank(message = "Titel får inte vara tom")
     @Size(min = 2, max = 100, message = "Titel måste vara mellan 2 och 100 tecken")
@@ -16,7 +20,6 @@ public class MeetingFormDto {
     private String description;
 
     @NotNull(message = "Datum måste anges")
-    @FutureOrPresent(message = "Datum kan inte vara i det förflutna")
     private LocalDate date;
 
     @NotNull(message = "Starttid måste anges")
@@ -31,6 +34,9 @@ public class MeetingFormDto {
 
     @NotNull(message = "Status måste anges")
     private MeetingStatus status;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
