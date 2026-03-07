@@ -15,4 +15,5 @@ public interface MeetingRepository extends ListCrudRepository<Meeting, Long> {
     List<Meeting> findByOrganizer(String organizer);
     List<Meeting> findByDateBetween(LocalDate from, LocalDate to);
     List<Meeting> findByTitleContainingIgnoreCase(String keyword);
+
 }
