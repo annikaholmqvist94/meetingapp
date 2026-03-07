@@ -48,6 +48,7 @@ public class MeetingService {
 
     // Skapa nytt möte
     public MeetingViewDto createMeeting(MeetingCreateDto dto) {
+        validateTimes(dto.getStartTime(), dto.getEndTime());
         Meeting meeting = meetingMapper.toEntity(dto);
         Meeting saved = meetingRepository.save(meeting);
         return meetingMapper.toViewDto(saved);
@@ -55,6 +56,7 @@ public class MeetingService {
 
     // Uppdatera befintligt möte
     public MeetingViewDto updateMeeting(Long id, MeetingUpdateDto dto) {
+        validateTimes(dto.getStartTime(), dto.getEndTime());
         Meeting meeting = findMeetingOrThrow(id);
         meetingMapper.updateEntityFromDto(meeting, dto);
         Meeting saved = meetingRepository.save(meeting);
@@ -65,6 +67,13 @@ public class MeetingService {
     public void deleteMeeting(Long id) {
         Meeting meeting = findMeetingOrThrow(id);
         meetingRepository.delete(meeting);
+    }
+
+    private void validateTimes(java.time.LocalTime start, java.time.LocalTime end) {
+        if (start != null && end != null && !end.isAfter(start)) {
+            throw new IllegalArgumentException(
+                    "Sluttid måste vara efter starttid");
+        }
     }
 
     // --- Filtrering ---

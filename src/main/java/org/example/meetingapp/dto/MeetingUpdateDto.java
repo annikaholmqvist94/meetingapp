@@ -2,9 +2,12 @@ package org.example.meetingapp.dto;
 
 import jakarta.validation.constraints.*;
 import org.example.meetingapp.entity.MeetingStatus;
+import org.example.meetingapp.validation.EndTimeAfterStartTime;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@EndTimeAfterStartTime
 public class MeetingUpdateDto {
 
     // Id behövs för att identifiera vilket möte som uppdateras
