@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(pageTitle, activePage, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — MeetingApp'">MeetingApp</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a th:href="@{/meetings}" class="navbar-brand">
+        <div class="logo-icon">M</div>
+        <span>MeetingApp</span>
+    </a>
+    <ul class="navbar-nav">
+        <li>
+            <a th:href="@{/meetings}"
+               th:classappend="${activePage == 'list'} ? 'active'"
+               class="nav-link">Möten</a>
+        </li>
+        <li>
+            <a th:href="@{/meetings/new}"
+               th:classappend="${activePage == 'create'} ? 'active'"
+               class="nav-link">+ Nytt möte</a>
+        </li>
+        <li>
+            <a th:href="@{/meetings/search}"
+               th:classappend="${activePage == 'search'} ? 'active'"
+               class="nav-link">Sök</a>
+        </li>
+    </ul>
+</nav>
+
+<!-- HUVUDINNEHÅLL -->
+<main class="main-content">
+
+    <div th:if="${successMessage}"
+         class="toast toast-success"
+         th:text="${successMessage}">
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="toast toast-danger"
+         th:text="${errorMessage}">
+    </div>
+
+    <th:block th:replace="${content}"/>
+
+</main>
+
+</body>
+</html>
