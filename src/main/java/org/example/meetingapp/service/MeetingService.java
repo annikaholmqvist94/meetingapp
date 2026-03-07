@@ -10,6 +10,10 @@ import org.example.meetingapp.mapper.MeetingMapper;
 import org.example.meetingapp.repository.MeetingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.List;
 @Transactional
 public class MeetingService {
 
+    private static final int PAGE_SIZE = 5;
     private final MeetingRepository meetingRepository;
     private final MeetingMapper meetingMapper;
 
@@ -25,15 +30,6 @@ public class MeetingService {
                           MeetingMapper meetingMapper) {
         this.meetingRepository = meetingRepository;
         this.meetingMapper = meetingMapper;
-    }
-
-    // Hämta alla möten
-    @Transactional(readOnly = true)
-    public List<MeetingViewDto> getAllMeetings() {
-        return meetingRepository.findAll()
-                .stream()
-                .map(meetingMapper::toViewDto)
-                .toList();
     }
 
     // Hämta ett möte som ViewDto
@@ -74,14 +70,6 @@ public class MeetingService {
     // --- Filtrering ---
 
     @Transactional(readOnly = true)
-    public List<MeetingViewDto> getMeetingsByStatus(MeetingStatus status) {
-        return meetingRepository.findByStatus(status)
-                .stream()
-                .map(meetingMapper::toViewDto)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<MeetingViewDto> getMeetingsByOrganizer(String organizer) {
         return meetingRepository.findByOrganizer(organizer)
                 .stream()
@@ -97,16 +85,36 @@ public class MeetingService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<MeetingViewDto> searchByTitle(String keyword) {
-        return meetingRepository.findByTitleContainingIgnoreCase(keyword)
-                .stream()
-                .map(meetingMapper::toViewDto)
-                .toList();
-    }
-
     private Meeting findMeetingOrThrow(Long id) {
         return meetingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
+    //-----Paginering-----
+
+    @Transactional(readOnly = true)
+    public Page<MeetingViewDto> getPagedMeetings(int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE,
+                Sort.by("date").descending());
+        return meetingRepository.findAll(pageable)
+                .map(meetingMapper::toViewDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MeetingViewDto> searchByTitlePaged(String keyword, int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE,
+                Sort.by("date").descending());
+        return meetingRepository
+                .findByTitleContainingIgnoreCase(keyword, pageable)
+                .map(meetingMapper::toViewDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MeetingViewDto> getMeetingsByStatusPaged(MeetingStatus status, int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE,
+                Sort.by("date").descending());
+        return meetingRepository.findByStatus(status, pageable)
+                .map(meetingMapper::toViewDto);
+    }
+
 }
