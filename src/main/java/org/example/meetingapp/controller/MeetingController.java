@@ -6,6 +6,7 @@ import org.example.meetingapp.dto.MeetingUpdateDto;
 import org.example.meetingapp.dto.MeetingViewDto;
 import org.example.meetingapp.entity.MeetingStatus;
 import org.example.meetingapp.service.MeetingService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,11 +26,16 @@ public class MeetingController {
         this.meetingService = meetingService;
     }
 
-    // GET /meetings — lista alla möten
+    // GET /meetings — paginerad lista
     @GetMapping
-    public String listMeetings(Model model) {
-        List<MeetingViewDto> meetings = meetingService.getAllMeetings();
-        model.addAttribute("meetings", meetings);
+    public String listMeetings(
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+        Page<MeetingViewDto> meetingPage = meetingService.getPagedMeetings(page);
+        model.addAttribute("meetings", meetingPage.getContent());
+        model.addAttribute("currentPage", meetingPage.getNumber());
+        model.addAttribute("totalPages", meetingPage.getTotalPages());
+        model.addAttribute("totalElements", meetingPage.getTotalElements());
         model.addAttribute("statuses", MeetingStatus.values());
         return "meetings/list";
     }
@@ -101,7 +107,7 @@ public class MeetingController {
         return "redirect:/meetings";
     }
 
-    // GET /meetings/search — filtrering
+    // GET /meetings/search — paginerad sökning
     @GetMapping("/search")
     public String searchMeetings(
             @RequestParam(required = false) String keyword,
@@ -109,23 +115,36 @@ public class MeetingController {
             @RequestParam(required = false) String organizer,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
+            @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        List<MeetingViewDto> meetings;
+        Page<MeetingViewDto> meetingPage = null;
+        List<MeetingViewDto> meetingList = null;
 
         if (keyword != null && !keyword.isBlank()) {
-            meetings = meetingService.searchByTitle(keyword);
+            meetingPage = meetingService.searchByTitlePaged(keyword, page);
         } else if (status != null) {
-            meetings = meetingService.getMeetingsByStatus(status);
+            meetingPage = meetingService.getMeetingsByStatusPaged(status, page);
         } else if (organizer != null && !organizer.isBlank()) {
-            meetings = meetingService.getMeetingsByOrganizer(organizer);
+            meetingList = meetingService.getMeetingsByOrganizer(organizer);
         } else if (from != null && to != null) {
-            meetings = meetingService.getMeetingsByDateRange(from, to);
+            meetingList = meetingService.getMeetingsByDateRange(from, to);
         } else {
-            meetings = meetingService.getAllMeetings();
+            meetingPage = meetingService.getPagedMeetings(page);
         }
 
-        model.addAttribute("meetings", meetings);
+        if (meetingPage != null) {
+            model.addAttribute("meetings", meetingPage.getContent());
+            model.addAttribute("currentPage", meetingPage.getNumber());
+            model.addAttribute("totalPages", meetingPage.getTotalPages());
+            model.addAttribute("totalElements", meetingPage.getTotalElements());
+        } else {
+            model.addAttribute("meetings", meetingList);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalElements", meetingList.size());
+        }
+
         model.addAttribute("statuses", MeetingStatus.values());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedStatus", status);

@@ -13,7 +13,7 @@
         <div>
             <h1 class="page-title">Möten</h1>
             <p class="page-subtitle"
-               th:text="${#lists.size(meetings)} + ' möten totalt'">
+               th:text="${totalElements} + ' möten totalt'">
             </p>
         </div>
         <a th:href="@{/meetings/new}" class="btn btn-primary">
@@ -115,13 +115,13 @@
                     </td>
                     <td th:text="${meeting.organizer()}"></td>
                     <td>
-                            <span th:text="${meeting.status()}"
-                                  th:classappend="${meeting.status().name() == 'PLANNED'} ? 'badge-planned' :
-                                                  (${meeting.status().name() == 'ONGOING'} ? 'badge-ongoing' :
-                                                  (${meeting.status().name() == 'COMPLETED'} ? 'badge-completed' :
-                                                  'badge-cancelled'))"
-                                  class="badge">
-                            </span>
+                        <span th:text="${meeting.status()}"
+                              th:classappend="${meeting.status().name() == 'PLANNED'} ? 'badge-planned' :
+                                              (${meeting.status().name() == 'ONGOING'} ? 'badge-ongoing' :
+                                              (${meeting.status().name() == 'COMPLETED'} ? 'badge-completed' :
+                                              'badge-cancelled'))"
+                              class="badge">
+                        </span>
                     </td>
                     <td>
                         <div style="display:flex; gap:0.5rem;">
@@ -141,6 +141,58 @@
                 </tr>
                 </tbody>
             </table>
+
+            <!-- PAGINERING -->
+            <div th:if="${totalPages > 1}"
+                 style="display: flex; align-items: center; justify-content: space-between;
+                        padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+
+                <span style="font-size: 0.85rem; color: var(--text-secondary);"
+                      th:text="'Sida ' + (${currentPage} + 1) + ' av ' + ${totalPages}
+                               + ' (' + ${totalElements} + ' möten totalt)'">
+                </span>
+
+                <div style="display: flex; gap: 0.5rem;">
+
+                    <!-- Föregående -->
+                    <a th:if="${currentPage > 0}"
+                       th:href="@{/meetings(page=${currentPage - 1})}"
+                       class="btn btn-secondary btn-sm">
+                        ← Föregående
+                    </a>
+                    <span th:unless="${currentPage > 0}"
+                          class="btn btn-secondary btn-sm"
+                          style="opacity: 0.4; cursor: not-allowed;">
+                        ← Föregående
+                    </span>
+
+                    <!-- Sidnummer -->
+                    <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a th:if="${i != currentPage}"
+                           th:href="@{/meetings(page=${i})}"
+                           th:text="${i + 1}"
+                           class="btn btn-secondary btn-sm">
+                        </a>
+                        <span th:if="${i == currentPage}"
+                              th:text="${i + 1}"
+                              class="btn btn-primary btn-sm">
+                        </span>
+                    </th:block>
+
+                    <!-- Nästa -->
+                    <a th:if="${currentPage < totalPages - 1}"
+                       th:href="@{/meetings(page=${currentPage + 1})}"
+                       class="btn btn-secondary btn-sm">
+                        Nästa →
+                    </a>
+                    <span th:unless="${currentPage < totalPages - 1}"
+                          class="btn btn-secondary btn-sm"
+                          style="opacity: 0.4; cursor: not-allowed;">
+                        Nästa →
+                    </span>
+
+                </div>
+            </div>
         </div>
     </div>
 
