@@ -31,8 +31,15 @@
                   th:object="${meetingUpdateDto}"
                   method="post">
 
-                <!-- Dolt id-fält — skickas med i POST -->
+                <!-- Dolt id-fält -->
                 <input type="hidden" th:field="*{id}"/>
+
+                <!-- Globala valideringsfel INUTI form -->
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <th:block th:each="err : ${#fields.globalErrors()}">
+                        <p th:text="${err}"></p>
+                    </th:block>
+                </div>
 
                 <div class="form-grid">
 

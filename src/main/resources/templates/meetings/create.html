@@ -29,6 +29,13 @@
                   th:object="${meetingCreateDto}"
                   method="post">
 
+                <!-- Globala valideringsfel INUTI form -->
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <th:block th:each="err : ${#fields.globalErrors()}">
+                        <p th:text="${err}"></p>
+                    </th:block>
+                </div>
+
                 <div class="form-grid">
 
                     <!-- TITEL -->
