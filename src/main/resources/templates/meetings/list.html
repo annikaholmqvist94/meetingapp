@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Alla möten',
+          activePage='list',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- SIDHUVUD -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Möten</h1>
+            <p class="page-subtitle"
+               th:text="${#lists.size(meetings)} + ' möten totalt'">
+            </p>
+        </div>
+        <a th:href="@{/meetings/new}" class="btn btn-primary">
+            + Nytt möte
+        </a>
+    </div>
+
+    <!-- FILTERBAR (VG) -->
+    <form th:action="@{/meetings/search}" method="get" class="filter-bar">
+        <div class="filter-group">
+            <label class="filter-label">Sök titel</label>
+            <input type="text"
+                   name="keyword"
+                   th:value="${keyword}"
+                   placeholder="ex. Planeringsmöte..."
+                   class="form-control"/>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select name="status" class="form-control">
+                <option value="">Alla statusar</option>
+                <option th:each="s : ${statuses}"
+                        th:value="${s}"
+                        th:text="${s}"
+                        th:selected="${s == selectedStatus}">
+                </option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Organisatör</label>
+            <input type="text"
+                   name="organizer"
+                   th:value="${organizer}"
+                   placeholder="ex. Anna Svensson..."
+                   class="form-control"/>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Från datum</label>
+            <input type="date"
+                   name="from"
+                   th:value="${from}"
+                   class="form-control"/>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Till datum</label>
+            <input type="date"
+                   name="to"
+                   th:value="${to}"
+                   class="form-control"/>
+        </div>
+        <div class="filter-group">
+            <button type="submit" class="btn btn-primary">Sök</button>
+            <a th:href="@{/meetings}" class="btn btn-secondary">Återställ</a>
+        </div>
+    </form>
+
+    <!-- TABELL -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Alla möten</span>
+        </div>
+
+        <!-- TOM STATE -->
+        <div th:if="${#lists.isEmpty(meetings)}" class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-title">Inga möten hittades</div>
+            <p>Skapa ditt första möte för att komma igång.</p>
+            <br/>
+            <a th:href="@{/meetings/new}" class="btn btn-primary">
+                + Nytt möte
+            </a>
+        </div>
+
+        <!-- MÖTESLISTA -->
+        <div th:if="${!#lists.isEmpty(meetings)}" class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Titel</th>
+                    <th>Datum</th>
+                    <th>Tid</th>
+                    <th>Organisatör</th>
+                    <th>Status</th>
+                    <th>Åtgärder</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="meeting : ${meetings}">
+                    <td>
+                        <strong th:text="${meeting.title()}"></strong>
+                        <div style="font-size:0.8rem; color:var(--text-secondary)"
+                             th:text="${meeting.description()}">
+                        </div>
+                    </td>
+                    <td th:text="${#temporals.format(meeting.date(), 'dd MMM yyyy')}"></td>
+                    <td th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                    + ' - '
+                                    + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                    </td>
+                    <td th:text="${meeting.organizer()}"></td>
+                    <td>
+                            <span th:text="${meeting.status()}"
+                                  th:classappend="${meeting.status().name() == 'PLANNED'} ? 'badge-planned' :
+                                                  (${meeting.status().name() == 'ONGOING'} ? 'badge-ongoing' :
+                                                  (${meeting.status().name() == 'COMPLETED'} ? 'badge-completed' :
+                                                  'badge-cancelled'))"
+                                  class="badge">
+                            </span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:0.5rem;">
+                            <a th:href="@{/meetings/{id}/edit(id=${meeting.id()})}"
+                               class="btn btn-secondary btn-sm">
+                                Redigera
+                            </a>
+                            <form th:action="@{/meetings/{id}/delete(id=${meeting.id()})}"
+                                  method="post"
+                                  onsubmit="return confirm('Är du säker på att du vill ta bort detta möte?')">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Ta bort
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>

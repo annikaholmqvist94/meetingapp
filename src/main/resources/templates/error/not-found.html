@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Fel',
+          activePage='',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+        <div class="card" style="max-width: 480px; width: 100%; text-align: center;">
+            <div class="card-body" style="padding: 3rem 2rem;">
+
+                <!-- Ikon -->
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🔍</div>
+
+                <!-- Titel -->
+                <h1 style="font-size: 1.5rem; font-weight: 700;
+                            color: var(--text-primary); margin-bottom: 0.75rem;"
+                    th:text="${errorTitle}">
+                </h1>
+
+                <!-- Meddelande -->
+                <p style="color: var(--text-secondary);
+                           font-size: 0.95rem; margin-bottom: 2rem;"
+                   th:text="${errorMessage}">
+                </p>
+
+                <!-- Tillbaka-knapp -->
+                <a th:href="${backUrl}" class="btn btn-primary">
+                    ← Gå tillbaka
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>

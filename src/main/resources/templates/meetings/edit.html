@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Redigera möte',
+          activePage='list',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- SIDHUVUD -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Redigera möte</h1>
+            <p class="page-subtitle"
+               th:text="'Uppdatera uppgifterna för: ' + ${meetingUpdateDto.title}">
+            </p>
+        </div>
+        <a th:href="@{/meetings}" class="btn btn-secondary">
+            ← Tillbaka
+        </a>
+    </div>
+
+    <!-- FORMULÄR -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Mötesuppgifter</span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/meetings/{id}/edit(id=${meetingUpdateDto.id})}"
+                  th:object="${meetingUpdateDto}"
+                  method="post">
+
+                <!-- Dolt id-fält — skickas med i POST -->
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="form-grid">
+
+                    <!-- TITEL -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Titel <span class="required">*</span>
+                        </label>
+                        <input type="text"
+                               th:field="*{title}"
+                               th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                               class="form-control"
+                               placeholder="ex. Planeringsmöte Q2"/>
+                        <span th:if="${#fields.hasErrors('title')}"
+                              th:errors="*{title}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- ORGANISATÖR -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Organisatör <span class="required">*</span>
+                        </label>
+                        <input type="text"
+                               th:field="*{organizer}"
+                               th:classappend="${#fields.hasErrors('organizer')} ? 'is-invalid'"
+                               class="form-control"
+                               placeholder="ex. Anna Svensson"/>
+                        <span th:if="${#fields.hasErrors('organizer')}"
+                              th:errors="*{organizer}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- BESKRIVNING -->
+                    <div class="form-group full-width">
+                        <label class="form-label">
+                            Beskrivning <span class="required">*</span>
+                        </label>
+                        <textarea th:field="*{description}"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Beskriv mötets syfte och agenda..."></textarea>
+                        <span th:if="${#fields.hasErrors('description')}"
+                              th:errors="*{description}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- DATUM -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Datum <span class="required">*</span>
+                        </label>
+                        <input type="date"
+                               th:field="*{date}"
+                               th:classappend="${#fields.hasErrors('date')} ? 'is-invalid'"
+                               class="form-control"/>
+                        <span th:if="${#fields.hasErrors('date')}"
+                              th:errors="*{date}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Status <span class="required">*</span>
+                        </label>
+                        <select th:field="*{status}"
+                                th:classappend="${#fields.hasErrors('status')} ? 'is-invalid'"
+                                class="form-control">
+                            <option value="">Välj status...</option>
+                            <option th:each="s : ${statuses}"
+                                    th:value="${s}"
+                                    th:text="${s}">
+                            </option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('status')}"
+                              th:errors="*{status}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- STARTTID -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Starttid <span class="required">*</span>
+                        </label>
+                        <input type="time"
+                               th:field="*{startTime}"
+                               th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'"
+                               class="form-control"/>
+                        <span th:if="${#fields.hasErrors('startTime')}"
+                              th:errors="*{startTime}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                    <!-- SLUTTID -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Sluttid <span class="required">*</span>
+                        </label>
+                        <input type="time"
+                               th:field="*{endTime}"
+                               th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'"
+                               class="form-control"/>
+                        <span th:if="${#fields.hasErrors('endTime')}"
+                              th:errors="*{endTime}"
+                              class="error-message">
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- KNAPPAR -->
+                <div class="form-actions">
+                    <a th:href="@{/meetings}" class="btn btn-secondary">Avbryt</a>
+                    <button type="submit" class="btn btn-primary">Spara ändringar</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>
