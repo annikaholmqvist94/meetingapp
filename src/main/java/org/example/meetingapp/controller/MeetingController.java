@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,7 +47,8 @@ public class MeetingController {
     public String createMeeting(
             @Valid @ModelAttribute MeetingCreateDto meetingCreateDto,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("statuses", MeetingStatus.values());
@@ -54,6 +56,8 @@ public class MeetingController {
         }
 
         meetingService.createMeeting(meetingCreateDto);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Mötet skapades!");
         return "redirect:/meetings";
     }
 
@@ -72,7 +76,8 @@ public class MeetingController {
             @PathVariable Long id,
             @Valid @ModelAttribute MeetingUpdateDto meetingUpdateDto,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("statuses", MeetingStatus.values());
@@ -80,13 +85,19 @@ public class MeetingController {
         }
 
         meetingService.updateMeeting(id, meetingUpdateDto);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Mötet uppdaterades!");
         return "redirect:/meetings";
     }
 
     // POST /meetings/{id}/delete — ta bort möte
     @PostMapping("/{id}/delete")
-    public String deleteMeeting(@PathVariable Long id) {
+    public String deleteMeeting(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
         meetingService.deleteMeeting(id);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Mötet togs bort.");
         return "redirect:/meetings";
     }
 
