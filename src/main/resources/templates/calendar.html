@@ -57,8 +57,7 @@
             <!-- Dagar i månaden -->
             <th:block th:each="dayNum : ${#numbers.sequence(1, daysInMonth)}">
                 <div th:with="currentDate=${firstDay.withDayOfMonth(dayNum)}"
-                     th:classappend="${currentDate == today} ? 'today' :
-                                     (!#maps.isEmpty(meetingsByDay) and meetingsByDay.containsKey(currentDate)) ? 'has-meetings'"
+                     th:classappend="${currentDate == today} ? 'today' : (${meetingsByDay.containsKey(currentDate)} ? 'has-meetings' : '')"
                      class="calendar-day">
 
                     <!-- Dagnummer -->
