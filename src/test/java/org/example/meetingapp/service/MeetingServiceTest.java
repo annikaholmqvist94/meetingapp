@@ -22,10 +22,12 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +42,6 @@ class MeetingServiceTest {
     @InjectMocks
     private MeetingService meetingService;
 
-    // Testdata
     private static final Long ID = 1L;
     private static final String TITLE = "Planeringsmöte";
     private static final String DESCRIPTION = "Genomgång av Q2";
@@ -277,5 +278,102 @@ class MeetingServiceTest {
         assertEquals(1, result.size());
         assertEquals(viewDto, result.get(0));
         verify(meetingRepository).findByDateBetween(from, to);
+    }
+
+    // ===== updateStatus =====
+
+    @Test
+    @DisplayName("updateStatus: ska uppdatera status och returnera ViewDto")
+    void updateStatus_shouldUpdateStatusAndReturnViewDto() {
+        when(meetingRepository.findById(ID)).thenReturn(Optional.of(meeting));
+        when(meetingRepository.save(meeting)).thenReturn(meeting);
+        when(meetingMapper.toViewDto(meeting)).thenReturn(viewDto);
+
+        MeetingViewDto result = meetingService.updateStatus(ID, MeetingStatus.ONGOING);
+
+        assertEquals(MeetingStatus.ONGOING, meeting.getStatus());
+        assertEquals(viewDto, result);
+        verify(meetingRepository).findById(ID);
+        verify(meetingRepository).save(meeting);
+    }
+
+    @Test
+    @DisplayName("updateStatus: ska kasta ResourceNotFoundException när möte saknas")
+    void updateStatus_shouldThrowWhenNotFound() {
+        when(meetingRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> meetingService.updateStatus(ID, MeetingStatus.ONGOING));
+
+        verify(meetingRepository, never()).save(any());
+    }
+
+    // ===== getKanbanData =====
+
+    @Test
+    @DisplayName("getKanbanData: ska returnera möten grupperade per status")
+    void getKanbanData_shouldReturnMeetingsGroupedByStatus() {
+        when(meetingRepository.findByStatusOrderByDateAscStartTimeAsc(any()))
+                .thenReturn(List.of(meeting));
+        when(meetingMapper.toViewDto(meeting)).thenReturn(viewDto);
+
+        Map<String, List<MeetingViewDto>> result = meetingService.getKanbanData();
+
+        assertNotNull(result);
+        assertEquals(4, result.size());
+        assertTrue(result.containsKey("PLANNED"));
+        assertTrue(result.containsKey("ONGOING"));
+        assertTrue(result.containsKey("COMPLETED"));
+        assertTrue(result.containsKey("CANCELLED"));
+    }
+
+    @Test
+    @DisplayName("getKanbanData: ska returnera tom lista för status utan möten")
+    void getKanbanData_shouldReturnEmptyListForStatusWithNoMeetings() {
+        when(meetingRepository.findByStatusOrderByDateAscStartTimeAsc(
+                eq(MeetingStatus.PLANNED))).thenReturn(List.of(meeting));
+        when(meetingRepository.findByStatusOrderByDateAscStartTimeAsc(
+                eq(MeetingStatus.ONGOING))).thenReturn(List.of());
+        when(meetingRepository.findByStatusOrderByDateAscStartTimeAsc(
+                eq(MeetingStatus.COMPLETED))).thenReturn(List.of());
+        when(meetingRepository.findByStatusOrderByDateAscStartTimeAsc(
+                eq(MeetingStatus.CANCELLED))).thenReturn(List.of());
+        when(meetingMapper.toViewDto(meeting)).thenReturn(viewDto);
+
+        Map<String, List<MeetingViewDto>> result = meetingService.getKanbanData();
+
+        assertEquals(1, result.get("PLANNED").size());
+        assertEquals(0, result.get("ONGOING").size());
+        assertEquals(0, result.get("COMPLETED").size());
+        assertEquals(0, result.get("CANCELLED").size());
+    }
+
+    // ===== getMeetingsForMonth =====
+
+    @Test
+    @DisplayName("getMeetingsForMonth: ska returnera möten grupperade per dag")
+    void getMeetingsForMonth_shouldReturnMeetingsGroupedByDay() {
+        when(meetingRepository.findByDateBetween(any(), any()))
+                .thenReturn(List.of(meeting));
+        when(meetingMapper.toViewDto(meeting)).thenReturn(viewDto);
+
+        Map<LocalDate, List<MeetingViewDto>> result =
+                meetingService.getMeetingsForMonth(2026, 5);
+
+        assertNotNull(result);
+        assertTrue(result.containsKey(DATE));
+        assertEquals(1, result.get(DATE).size());
+    }
+
+    @Test
+    @DisplayName("getMeetingsForMonth: ska returnera tom map om inga möten finns")
+    void getMeetingsForMonth_shouldReturnEmptyMapWhenNoMeetings() {
+        when(meetingRepository.findByDateBetween(any(), any()))
+                .thenReturn(List.of());
+
+        Map<LocalDate, List<MeetingViewDto>> result =
+                meetingService.getMeetingsForMonth(2026, 5);
+
+        assertTrue(result.isEmpty());
     }
 }
