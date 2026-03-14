@@ -22,6 +22,11 @@
                class="nav-link">Möten</a>
         </li>
         <li>
+            <a th:href="@{/meetings/kanban}"
+               th:classappend="${activePage == 'kanban'} ? 'active'"
+               class="nav-link">Kanban</a>
+        </li>
+        <li>
             <a th:href="@{/meetings/new}"
                th:classappend="${activePage == 'create'} ? 'active'"
                class="nav-link">+ Nytt möte</a>
