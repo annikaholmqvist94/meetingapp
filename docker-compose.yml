@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: meetingapp-db
+    environment:
+      POSTGRES_DB: meetingdb
+      POSTGRES_USER: meeting_user
+      POSTGRES_PASSWORD: meeting_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - meetingapp-data:/var/lib/postgresql/data
+
+volumes:
+  meetingapp-data:
