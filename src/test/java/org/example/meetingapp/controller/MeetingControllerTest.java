@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,7 +36,6 @@ class MeetingControllerTest {
     @MockitoBean
     private MeetingService meetingService;
 
-    // Testdata
     private static final Long ID = 1L;
     private MeetingViewDto viewDto;
     private MeetingUpdateDto updateDto;
@@ -132,7 +132,7 @@ class MeetingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /meetings/new: ska visa create-vy igen vid valideringsfel")
+    @DisplayName("POST /meetings/new: ska visa create-vy vid valideringsfel")
     void createMeeting_shouldReturnCreateViewOnValidationError() throws Exception {
         mockMvc.perform(post("/meetings/new")
                         .param("title", "")
@@ -179,7 +179,7 @@ class MeetingControllerTest {
     // ===== POST /meetings/{id}/edit =====
 
     @Test
-    @DisplayName("POST /meetings/{id}/edit: ska redirecta till /meetings vid giltiga data")
+    @DisplayName("POST /meetings/{id}/edit: ska redirecta vid giltiga data")
     void updateMeeting_shouldRedirectOnSuccess() throws Exception {
         when(meetingService.updateMeeting(eq(ID), any(MeetingUpdateDto.class)))
                 .thenReturn(viewDto);
@@ -198,7 +198,7 @@ class MeetingControllerTest {
     }
 
     @Test
-    @DisplayName("POST /meetings/{id}/edit: ska visa edit-vy igen vid valideringsfel")
+    @DisplayName("POST /meetings/{id}/edit: ska visa edit-vy vid valideringsfel")
     void updateMeeting_shouldReturnEditViewOnValidationError() throws Exception {
         mockMvc.perform(post("/meetings/{id}/edit", ID)
                         .param("id", "1")
@@ -212,7 +212,7 @@ class MeetingControllerTest {
     // ===== POST /meetings/{id}/delete =====
 
     @Test
-    @DisplayName("POST /meetings/{id}/delete: ska redirecta till /meetings efter borttagning")
+    @DisplayName("POST /meetings/{id}/delete: ska redirecta efter borttagning")
     void deleteMeeting_shouldRedirectAfterDelete() throws Exception {
         doNothing().when(meetingService).deleteMeeting(ID);
 
@@ -230,6 +230,66 @@ class MeetingControllerTest {
                 .when(meetingService).deleteMeeting(ID);
 
         mockMvc.perform(post("/meetings/{id}/delete", ID))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error/not-found"));
+    }
+
+    // ===== GET /meetings/kanban =====
+
+    @Test
+    @DisplayName("GET /meetings/kanban: ska returnera kanban-vy")
+    void showKanban_shouldReturnKanbanView() throws Exception {
+        when(meetingService.getKanbanData()).thenReturn(Map.of(
+                "PLANNED", List.of(viewDto),
+                "ONGOING", List.of(),
+                "COMPLETED", List.of(),
+                "CANCELLED", List.of()
+        ));
+
+        mockMvc.perform(get("/meetings/kanban"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("meetings/kanban"));
+    }
+
+    @Test
+    @DisplayName("GET /meetings/kanban: ska sätta kanbanData i modellen")
+    void showKanban_shouldAddKanbanDataToModel() throws Exception {
+        when(meetingService.getKanbanData()).thenReturn(Map.of(
+                "PLANNED", List.of(viewDto),
+                "ONGOING", List.of(),
+                "COMPLETED", List.of(),
+                "CANCELLED", List.of()
+        ));
+
+        mockMvc.perform(get("/meetings/kanban"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("kanbanData"))
+                .andExpect(model().attributeExists("statuses"));
+    }
+
+    // ===== POST /meetings/{id}/status =====
+
+    @Test
+    @DisplayName("POST /meetings/{id}/status: ska returnera 200 vid lyckad statusuppdatering")
+    void updateStatus_shouldReturn200OnSuccess() throws Exception {
+        when(meetingService.updateStatus(ID, MeetingStatus.ONGOING))
+                .thenReturn(viewDto);
+
+        mockMvc.perform(post("/meetings/{id}/status", ID)
+                        .param("status", "ONGOING"))
+                .andExpect(status().isOk());
+
+        verify(meetingService).updateStatus(ID, MeetingStatus.ONGOING);
+    }
+
+    @Test
+    @DisplayName("POST /meetings/{id}/status: ska returnera 404 när möte saknas")
+    void updateStatus_shouldHandleNotFound() throws Exception {
+        when(meetingService.updateStatus(ID, MeetingStatus.ONGOING))
+                .thenThrow(new ResourceNotFoundException(ID));
+
+        mockMvc.perform(post("/meetings/{id}/status", ID)
+                        .param("status", "ONGOING"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("error/not-found"));
     }
@@ -254,8 +314,8 @@ class MeetingControllerTest {
     @DisplayName("GET /meetings/search: ska sätta sökparametrar i modellen")
     void searchMeetings_shouldAddSearchParamsToModel() throws Exception {
         Page<MeetingViewDto> page = new PageImpl<>(List.of(viewDto));
-        when(meetingService.getMeetingsByStatusPaged(eq(MeetingStatus.PLANNED), eq(0)))
-                .thenReturn(page);
+        when(meetingService.getMeetingsByStatusPaged(
+                eq(MeetingStatus.PLANNED), eq(0))).thenReturn(page);
 
         mockMvc.perform(get("/meetings/search")
                         .param("status", "PLANNED"))
