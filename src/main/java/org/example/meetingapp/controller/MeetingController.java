@@ -7,6 +7,7 @@ import org.example.meetingapp.dto.MeetingViewDto;
 import org.example.meetingapp.entity.MeetingStatus;
 import org.example.meetingapp.service.MeetingService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -152,5 +153,23 @@ public class MeetingController {
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         return "meetings/list";
+    }
+
+    // GET /meetings/kanban — visa kanban-vy
+    @GetMapping("/kanban")
+    public String showKanban(Model model) {
+        model.addAttribute("kanbanData", meetingService.getKanbanData());
+        model.addAttribute("statuses", MeetingStatus.values());
+        return "meetings/kanban";
+    }
+
+    // POST /meetings/{id}/status — uppdatera status via drag & drop
+    @PostMapping("/{id}/status")
+    @ResponseBody
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable Long id,
+            @RequestParam MeetingStatus status) {
+        meetingService.updateStatus(id, status);
+        return ResponseEntity.ok().build();
     }
 }

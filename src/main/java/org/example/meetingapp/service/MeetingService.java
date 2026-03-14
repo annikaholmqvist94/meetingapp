@@ -16,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -97,6 +99,31 @@ public class MeetingService {
     private Meeting findMeetingOrThrow(Long id) {
         return meetingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
+    // Kanban — möten grupperade per status, sorterade på datum+starttid
+    @Transactional(readOnly = true)
+    public Map<MeetingStatus, List<MeetingViewDto>> getKanbanData() {
+        Map<MeetingStatus, List<MeetingViewDto>> kanban = new LinkedHashMap<>();
+
+        // Definierar ordningen på kolumnerna
+        for (MeetingStatus status : MeetingStatus.values()) {
+            List<MeetingViewDto> meetings = meetingRepository
+                    .findByStatusOrderByDateAscStartTimeAsc(status)
+                    .stream()
+                    .map(meetingMapper::toViewDto)
+                    .toList();
+            kanban.put(status, meetings);
+        }
+        return kanban;
+    }
+
+    // Uppdatera bara status — används av drag & drop
+    public MeetingViewDto updateStatus(Long id, MeetingStatus newStatus) {
+        Meeting meeting = findMeetingOrThrow(id);
+        meeting.setStatus(newStatus);
+        Meeting saved = meetingRepository.save(meeting);
+        return meetingMapper.toViewDto(saved);
     }
 
     //-----Paginering-----

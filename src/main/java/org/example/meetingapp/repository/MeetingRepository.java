@@ -22,4 +22,7 @@ public interface MeetingRepository extends
 
     List<Meeting> findByOrganizer(String organizer);
     List<Meeting> findByDateBetween(LocalDate from, LocalDate to);
+
+    // Sorterad på datum och starttid — används av kanban
+    List<Meeting> findByStatusOrderByDateAscStartTimeAsc(MeetingStatus status);
 }
