@@ -2,6 +2,11 @@
 
 En professionell möteshanteringsapplikation byggd med Spring Boot och Thymeleaf.
 
+## Skärmdumpar
+
+![Dashboard](docs/images/dashboard.png)
+![Kanban](docs/images/kanban.png)
+
 ## Tekniker
 
 - **Backend:** Java 21, Spring Boot, Spring MVC, Spring Data JPA
