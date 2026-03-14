@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/meetings")
@@ -155,10 +156,10 @@ public class MeetingController {
         return "meetings/list";
     }
 
-    // GET /meetings/kanban — visa kanban-vy
     @GetMapping("/kanban")
     public String showKanban(Model model) {
-        model.addAttribute("kanbanData", meetingService.getKanbanData());
+        Map<String, List<MeetingViewDto>> kanbanData = meetingService.getKanbanData();
+        model.addAttribute("kanbanData", kanbanData);
         model.addAttribute("statuses", MeetingStatus.values());
         return "meetings/kanban";
     }

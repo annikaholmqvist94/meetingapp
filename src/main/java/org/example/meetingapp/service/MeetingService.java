@@ -16,9 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -101,19 +99,25 @@ public class MeetingService {
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
-    // Kanban — möten grupperade per status, sorterade på datum+starttid
     @Transactional(readOnly = true)
-    public Map<MeetingStatus, List<MeetingViewDto>> getKanbanData() {
-        Map<MeetingStatus, List<MeetingViewDto>> kanban = new LinkedHashMap<>();
+    public Map<String, List<MeetingViewDto>> getKanbanData() {
+        Map<String, List<MeetingViewDto>> kanban = new LinkedHashMap<>();
 
-        // Definierar ordningen på kolumnerna
         for (MeetingStatus status : MeetingStatus.values()) {
-            List<MeetingViewDto> meetings = meetingRepository
-                    .findByStatusOrderByDateAscStartTimeAsc(status)
+            List<Meeting> meetings = meetingRepository
+                    .findByStatusOrderByDateAscStartTimeAsc(status);
+
+            if (meetings == null) {
+                meetings = new ArrayList<>();
+            }
+
+            List<MeetingViewDto> dtos = meetings
                     .stream()
                     .map(meetingMapper::toViewDto)
                     .toList();
-            kanban.put(status, meetings);
+
+            // Använd String som nyckel istället för enum
+            kanban.put(status.name(), dtos);
         }
         return kanban;
     }
