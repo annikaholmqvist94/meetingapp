@@ -164,6 +164,11 @@ public class MeetingController {
         return "meetings/kanban";
     }
 
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/dashboard";
+    }
+
     // POST /meetings/{id}/status — uppdatera status via drag & drop
     @PostMapping("/{id}/status")
     @ResponseBody

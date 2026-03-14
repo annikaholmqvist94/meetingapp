@@ -720,6 +720,213 @@ tbody td {
     gap: 0.4rem;
 }
 
+/* ===== DASHBOARD ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 1.75rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.stat-icon.total     { background: rgba(99, 102, 241, 0.15); }
+.stat-icon.planned   { background: var(--planned-bg); }
+.stat-icon.ongoing   { background: var(--ongoing-bg); }
+.stat-icon.completed { background: var(--completed-bg); }
+.stat-icon.cancelled { background: var(--cancelled-bg); }
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-value.planned   { color: var(--planned-text); }
+.stat-value.ongoing   { color: var(--ongoing-text); }
+.stat-value.completed { color: var(--completed-text); }
+.stat-value.cancelled { color: var(--cancelled-text); }
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ===== DASHBOARD GRID ===== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+}
+
+/* ===== MEETING ROW ===== */
+.meeting-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+}
+
+.meeting-row:last-child {
+    border-bottom: none;
+}
+
+.meeting-row:hover {
+    background: var(--glass-hover);
+}
+
+.meeting-row-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 36px;
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.5rem;
+}
+
+.meeting-day {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.meeting-month {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.meeting-row-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.meeting-row-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meeting-row-meta {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.4rem;
+}
+
+/* ===== STATUSFÖRDELNING ===== */
+.distribution {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.distribution-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.distribution-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 90px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.distribution-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.distribution-dot.planned   { background: var(--planned-text); }
+.distribution-dot.ongoing   { background: var(--ongoing-text); }
+.distribution-dot.completed { background: var(--completed-text); }
+.distribution-dot.cancelled { background: var(--cancelled-text); }
+
+.distribution-bar-wrapper {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-elevated);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.distribution-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.8s ease;
+    min-width: 2px;
+}
+
+.distribution-bar.planned   { background: var(--planned-text); }
+.distribution-bar.ongoing   { background: var(--ongoing-text); }
+.distribution-bar.completed { background: var(--completed-text); }
+.distribution-bar.cancelled { background: var(--cancelled-text); }
+
+.distribution-pct {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* ===== RESPONSIV DASHBOARD ===== */
+@media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .dashboard-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-grid { grid-template-columns: 1fr; }
+}
+
 /* ===== RESPONSIV ===== */
 @media (max-width: 1200px) {
     .kanban-board {

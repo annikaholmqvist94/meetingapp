@@ -17,6 +17,11 @@
     </a>
     <ul class="navbar-nav">
         <li>
+            <a th:href="@{/dashboard}"
+               th:classappend="${activePage == 'dashboard'} ? 'active'"
+               class="nav-link">Dashboard</a>
+        </li>
+        <li>
             <a th:href="@{/meetings}"
                th:classappend="${activePage == 'list'} ? 'active'"
                class="nav-link">Möten</a>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Dashboard',
+          activePage='dashboard',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- SIDHUVUD -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle"
+               th:text="'Översikt — ' + ${#temporals.format(#temporals.createNow(), 'EEEE dd MMMM yyyy')}">
+            </p>
+        </div>
+        <a th:href="@{/meetings/new}" class="btn btn-primary">
+            + Nytt möte
+        </a>
+    </div>
+
+    <!-- STATISTIKKORT -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon total">📊</div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${totalCount}">0</div>
+                <div class="stat-label">Totalt</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon planned">📋</div>
+            <div class="stat-info">
+                <div class="stat-value planned" th:text="${plannedCount}">0</div>
+                <div class="stat-label">Planerade</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon ongoing">⚡</div>
+            <div class="stat-info">
+                <div class="stat-value ongoing" th:text="${ongoingCount}">0</div>
+                <div class="stat-label">Pågående</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon completed">✅</div>
+            <div class="stat-info">
+                <div class="stat-value completed" th:text="${completedCount}">0</div>
+                <div class="stat-label">Avslutade</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon cancelled">🚫</div>
+            <div class="stat-info">
+                <div class="stat-value cancelled" th:text="${cancelledCount}">0</div>
+                <div class="stat-label">Inställda</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NEDRE SEKTION -->
+    <div class="dashboard-grid">
+
+        <!-- KOMMANDE MÖTEN -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Kommande möten</span>
+                <a th:href="@{/meetings}" class="btn btn-secondary btn-sm">
+                    Visa alla
+                </a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div th:if="${#lists.isEmpty(upcomingMeetings)}"
+                     class="empty-state" style="padding: 2rem;">
+                    <div class="empty-state-icon">📅</div>
+                    <div class="empty-state-title">Inga kommande möten</div>
+                </div>
+                <div th:each="meeting : ${upcomingMeetings}"
+                     class="meeting-row">
+                    <div class="meeting-row-date">
+                        <span class="meeting-day"
+                              th:text="${#temporals.format(meeting.date(), 'dd')}">
+                        </span>
+                        <span class="meeting-month"
+                              th:text="${#temporals.format(meeting.date(), 'MMM')}">
+                        </span>
+                    </div>
+                    <div class="meeting-row-info">
+                        <div class="meeting-row-title"
+                             th:text="${meeting.title()}">
+                        </div>
+                        <div class="meeting-row-meta">
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                            <span>·</span>
+                            <span th:text="${meeting.organizer()}"></span>
+                        </div>
+                    </div>
+                    <span th:text="${meeting.status()}"
+                          th:classappend="${meeting.status().name() == 'PLANNED'} ? 'badge-planned' :
+                                          (${meeting.status().name() == 'ONGOING'} ? 'badge-ongoing' :
+                                          (${meeting.status().name() == 'COMPLETED'} ? 'badge-completed' :
+                                          'badge-cancelled'))"
+                          class="badge">
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUSFÖRDELNING -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Statusfördelning</span>
+            </div>
+            <div class="card-body">
+
+                <div th:if="${totalCount == 0}" class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-title">Ingen data ännu</div>
+                </div>
+
+                <div th:if="${totalCount > 0}" class="distribution">
+
+                    <!-- PLANNED -->
+                    <div class="distribution-row">
+                        <div class="distribution-label">
+                            <span class="distribution-dot planned"></span>
+                            <span>Planerade</span>
+                        </div>
+                        <div class="distribution-bar-wrapper">
+                            <div class="distribution-bar planned"
+                                 th:style="'width: ' + ${statusPercentages.getOrDefault('PLANNED', 0.0)} + '%'">
+                            </div>
+                        </div>
+                        <span class="distribution-pct"
+                              th:text="${statusPercentages.getOrDefault('PLANNED', 0.0)} + '%'">
+                        </span>
+                    </div>
+
+                    <!-- ONGOING -->
+                    <div class="distribution-row">
+                        <div class="distribution-label">
+                            <span class="distribution-dot ongoing"></span>
+                            <span>Pågående</span>
+                        </div>
+                        <div class="distribution-bar-wrapper">
+                            <div class="distribution-bar ongoing"
+                                 th:style="'width: ' + ${statusPercentages.getOrDefault('ONGOING', 0.0)} + '%'">
+                            </div>
+                        </div>
+                        <span class="distribution-pct"
+                              th:text="${statusPercentages.getOrDefault('ONGOING', 0.0)} + '%'">
+                        </span>
+                    </div>
+
+                    <!-- COMPLETED -->
+                    <div class="distribution-row">
+                        <div class="distribution-label">
+                            <span class="distribution-dot completed"></span>
+                            <span>Avslutade</span>
+                        </div>
+                        <div class="distribution-bar-wrapper">
+                            <div class="distribution-bar completed"
+                                 th:style="'width: ' + ${statusPercentages.getOrDefault('COMPLETED', 0.0)} + '%'">
+                            </div>
+                        </div>
+                        <span class="distribution-pct"
+                              th:text="${statusPercentages.getOrDefault('COMPLETED', 0.0)} + '%'">
+                        </span>
+                    </div>
+
+                    <!-- CANCELLED -->
+                    <div class="distribution-row">
+                        <div class="distribution-label">
+                            <span class="distribution-dot cancelled"></span>
+                            <span>Inställda</span>
+                        </div>
+                        <div class="distribution-bar-wrapper">
+                            <div class="distribution-bar cancelled"
+                                 th:style="'width: ' + ${statusPercentages.getOrDefault('CANCELLED', 0.0)} + '%'">
+                            </div>
+                        </div>
+                        <span class="distribution-pct"
+                              th:text="${statusPercentages.getOrDefault('CANCELLED', 0.0)} + '%'">
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SENASTE MÖTEN -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Senaste möten</span>
+                <a th:href="@{/meetings}" class="btn btn-secondary btn-sm">
+                    Visa alla
+                </a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div th:if="${#lists.isEmpty(recentMeetings)}"
+                     class="empty-state" style="padding: 2rem;">
+                    <div class="empty-state-icon">🕐</div>
+                    <div class="empty-state-title">Inga tidigare möten</div>
+                </div>
+                <div th:each="meeting : ${recentMeetings}"
+                     class="meeting-row">
+                    <div class="meeting-row-date">
+                        <span class="meeting-day"
+                              th:text="${#temporals.format(meeting.date(), 'dd')}">
+                        </span>
+                        <span class="meeting-month"
+                              th:text="${#temporals.format(meeting.date(), 'MMM')}">
+                        </span>
+                    </div>
+                    <div class="meeting-row-info">
+                        <div class="meeting-row-title"
+                             th:text="${meeting.title()}">
+                        </div>
+                        <div class="meeting-row-meta">
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                            <span>·</span>
+                            <span th:text="${meeting.organizer()}"></span>
+                        </div>
+                    </div>
+                    <span th:text="${meeting.status()}"
+                          th:classappend="${meeting.status().name() == 'PLANNED'} ? 'badge-planned' :
+                                          (${meeting.status().name() == 'ONGOING'} ? 'badge-ongoing' :
+                                          (${meeting.status().name() == 'COMPLETED'} ? 'badge-completed' :
+                                          'badge-cancelled'))"
+                          class="badge">
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</th:block>
+</body>
+</html>
