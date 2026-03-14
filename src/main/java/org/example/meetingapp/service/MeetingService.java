@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -155,6 +156,23 @@ public class MeetingService {
                 Sort.by("date").descending());
         return meetingRepository.findByStatus(status, pageable)
                 .map(meetingMapper::toViewDto);
+    }
+
+    // Möten grupperade per dag för kalendervy
+    @Transactional(readOnly = true)
+    public Map<LocalDate, List<MeetingViewDto>> getMeetingsForMonth(int year, int month) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<Meeting> meetings = meetingRepository.findByDateBetween(start, end);
+
+        return meetings.stream()
+                .map(meetingMapper::toViewDto)
+                .collect(Collectors.groupingBy(
+                        MeetingViewDto::date,
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
     }
 
 }
