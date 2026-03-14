@@ -25,4 +25,10 @@ public interface MeetingRepository extends
 
     // Sorterad på datum och starttid — används av kanban
     List<Meeting> findByStatusOrderByDateAscStartTimeAsc(MeetingStatus status);
+
+    // Kommande möten
+    List<Meeting> findByDateGreaterThanEqualOrderByDateAscStartTimeAsc(LocalDate date);
+
+    // Senaste möten
+    List<Meeting> findByDateLessThanOrderByDateDescStartTimeDesc(LocalDate date);
 }
