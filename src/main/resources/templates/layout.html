@@ -32,6 +32,11 @@
                class="nav-link">Kanban</a>
         </li>
         <li>
+            <a th:href="@{/calendar}"
+               th:classappend="${activePage == 'calendar'} ? 'active'"
+               class="nav-link">Kalender</a>
+        </li>
+        <li>
             <a th:href="@{/meetings/new}"
                th:classappend="${activePage == 'create'} ? 'active'"
                class="nav-link">+ Nytt möte</a>

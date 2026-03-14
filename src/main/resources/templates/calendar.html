@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Kalender',
+          activePage='calendar',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- SIDHUVUD -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Kalender</h1>
+            <p class="page-subtitle"
+               th:text="${#temporals.format(firstDay, 'MMMM yyyy')}">
+            </p>
+        </div>
+        <a th:href="@{/meetings/new}" class="btn btn-primary">
+            + Nytt möte
+        </a>
+    </div>
+
+    <!-- KALENDER KORT -->
+    <div class="card">
+
+        <!-- NAVIGATION -->
+        <div class="calendar-nav">
+            <a th:href="@{/calendar(year=${prevYear}, month=${prevMonth})}"
+               class="btn btn-secondary btn-sm">
+                ← Föregående
+            </a>
+            <h2 class="calendar-month-title"
+                th:text="${#temporals.format(firstDay, 'MMMM yyyy')}">
+            </h2>
+            <a th:href="@{/calendar(year=${nextYear}, month=${nextMonth})}"
+               class="btn btn-secondary btn-sm">
+                Nästa →
+            </a>
+        </div>
+
+        <!-- VECKODAGAR -->
+        <div class="calendar-grid">
+            <div class="calendar-weekday">Mån</div>
+            <div class="calendar-weekday">Tis</div>
+            <div class="calendar-weekday">Ons</div>
+            <div class="calendar-weekday">Tor</div>
+            <div class="calendar-weekday">Fre</div>
+            <div class="calendar-weekday weekend">Lör</div>
+            <div class="calendar-weekday weekend">Sön</div>
+
+            <!-- Tomma celler innan första dagen -->
+            <th:block th:each="i : ${#numbers.sequence(1, firstDay.dayOfWeek.value - 1)}">
+                <div class="calendar-day empty"></div>
+            </th:block>
+
+            <!-- Dagar i månaden -->
+            <th:block th:each="dayNum : ${#numbers.sequence(1, daysInMonth)}">
+                <div th:with="currentDate=${firstDay.withDayOfMonth(dayNum)}"
+                     th:classappend="${currentDate == today} ? 'today' :
+                                     (!#maps.isEmpty(meetingsByDay) and meetingsByDay.containsKey(currentDate)) ? 'has-meetings'"
+                     class="calendar-day">
+
+                    <!-- Dagnummer -->
+                    <div class="calendar-day-number"
+                         th:classappend="${currentDate == today} ? 'today'"
+                         th:text="${dayNum}">
+                    </div>
+
+                    <!-- Möten denna dag -->
+                    <div th:if="${!#maps.isEmpty(meetingsByDay) and meetingsByDay.containsKey(currentDate)}"
+                         class="calendar-day-meetings">
+                        <div th:each="meeting, iterStat : ${meetingsByDay.get(currentDate)}"
+                             th:if="${iterStat.index < 3}"
+                             th:classappend="${meeting.status().name() == 'PLANNED'} ? 'planned' :
+                                             (${meeting.status().name() == 'ONGOING'} ? 'ongoing' :
+                                             (${meeting.status().name() == 'COMPLETED'} ? 'completed' :
+                                             'cancelled'))"
+                             class="calendar-meeting-pill">
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' ' + ${meeting.title()}">
+                            </span>
+                        </div>
+                        <!-- Visa +N om fler än 3 möten -->
+                        <div th:if="${#lists.size(meetingsByDay.get(currentDate)) > 3}"
+                             class="calendar-more"
+                             th:text="'+ ' + (${#lists.size(meetingsByDay.get(currentDate))} - 3) + ' till'">
+                        </div>
+                    </div>
+
+                </div>
+            </th:block>
+
+        </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="calendar-legend">
+        <div class="legend-item">
+            <span class="legend-dot planned"></span>
+            <span>Planerat</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot ongoing"></span>
+            <span>Pågående</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot completed"></span>
+            <span>Avslutat</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot cancelled"></span>
+            <span>Inställt</span>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>

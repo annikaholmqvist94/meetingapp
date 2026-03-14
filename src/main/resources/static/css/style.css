@@ -916,6 +916,192 @@ tbody td {
     text-align: right;
 }
 
+/* ===== KALENDER ===== */
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.calendar-month-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+}
+
+.calendar-weekday {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-weekday.weekend {
+    color: var(--cancelled-text);
+}
+
+.calendar-day {
+    min-height: 110px;
+    padding: 0.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+    vertical-align: top;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: var(--glass-hover);
+}
+
+.calendar-day.empty {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.today {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.calendar-day.has-meetings {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-day-number {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 0.35rem;
+}
+
+.calendar-day-number.today {
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day-meetings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.calendar-meeting-pill {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.calendar-meeting-pill:hover {
+    opacity: 0.8;
+}
+
+.calendar-meeting-pill.planned {
+    background: var(--planned-bg);
+    color: var(--planned-text);
+    border-left: 2px solid var(--planned-text);
+}
+
+.calendar-meeting-pill.ongoing {
+    background: var(--ongoing-bg);
+    color: var(--ongoing-text);
+    border-left: 2px solid var(--ongoing-text);
+}
+
+.calendar-meeting-pill.completed {
+    background: var(--completed-bg);
+    color: var(--completed-text);
+    border-left: 2px solid var(--completed-text);
+}
+
+.calendar-meeting-pill.cancelled {
+    background: var(--cancelled-bg);
+    color: var(--cancelled-text);
+    border-left: 2px solid var(--cancelled-text);
+}
+
+.calendar-more {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0.1rem 0.5rem;
+}
+
+/* ===== KALENDER LEGEND ===== */
+.calendar-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding: 0 0.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-dot.planned   { background: var(--planned-text); }
+.legend-dot.ongoing   { background: var(--ongoing-text); }
+.legend-dot.completed { background: var(--completed-text); }
+.legend-dot.cancelled { background: var(--cancelled-text); }
+
+/* ===== RESPONSIV KALENDER ===== */
+@media (max-width: 768px) {
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+
+    .calendar-meeting-pill {
+        display: none;
+    }
+
+    .calendar-day.has-meetings::after {
+        content: '●';
+        font-size: 0.5rem;
+        color: var(--primary);
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+    }
+}
+
 /* ===== RESPONSIV DASHBOARD ===== */
 @media (max-width: 1200px) {
     .stats-grid { grid-template-columns: repeat(3, 1fr); }
