@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="sv" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(
+          pageTitle='Kanban',
+          activePage='kanban',
+          content=~{::main-content})}">
+
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- SIDHUVUD -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Kanban</h1>
+            <p class="page-subtitle">Dra och släpp möten mellan kolumner för att uppdatera status</p>
+        </div>
+        <a th:href="@{/meetings/new}" class="btn btn-primary">
+            + Nytt möte
+        </a>
+    </div>
+
+    <!-- KANBAN BOARD -->
+    <div class="kanban-board" id="kanbanBoard">
+
+        <!-- KOLUMN: PLANNED -->
+        <div class="kanban-column"
+             id="col-PLANNED"
+             data-status="PLANNED"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+            <div class="kanban-column-header planned">
+                <span class="kanban-column-title planned">Planerat</span>
+                <span class="kanban-count planned"
+                      th:text="${#lists.size(kanbanData['PLANNED'])}">0</span>
+            </div>
+
+            <div class="kanban-cards" id="cards-PLANNED">
+                <div th:if="${#lists.isEmpty(kanbanData['PLANNED'])}"
+                     class="kanban-empty">
+                    <div class="kanban-empty-icon">📋</div>
+                    <span>Inga planerade möten</span>
+                </div>
+                <div th:each="meeting : ${kanbanData['PLANNED']}"
+                     th:id="'card-' + ${meeting.id()}"
+                     th:data-id="${meeting.id()}"
+                     th:data-status="PLANNED"
+                     class="kanban-card planned"
+                     draggable="true"
+                     ondragstart="handleDragStart(event)">
+
+                    <div class="kanban-card-title" th:text="${meeting.title()}"></div>
+                    <div class="kanban-card-meta">
+                        <span>📅
+                            <span th:text="${#temporals.format(meeting.date(), 'dd MMM yyyy')}"></span>
+                        </span>
+                        <span>🕐
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                        </span>
+                        <span>👤 <span th:text="${meeting.organizer()}"></span></span>
+                    </div>
+                    <div class="kanban-card-actions">
+                        <a th:href="@{/meetings/{id}/edit(id=${meeting.id()})}"
+                           class="btn btn-secondary btn-sm">Redigera</a>
+                        <form th:action="@{/meetings/{id}/delete(id=${meeting.id()})}"
+                              method="post"
+                              onsubmit="return confirm('Ta bort mötet?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Ta bort</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KOLUMN: ONGOING -->
+        <div class="kanban-column"
+             id="col-ONGOING"
+             data-status="ONGOING"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+            <div class="kanban-column-header ongoing">
+                <span class="kanban-column-title ongoing">Pågående</span>
+                <span class="kanban-count ongoing"
+                      th:text="${#lists.size(kanbanData['ONGOING'])}">0</span>
+            </div>
+
+            <div class="kanban-cards" id="cards-ONGOING">
+                <div th:if="${#lists.isEmpty(kanbanData['ONGOING'])}"
+                     class="kanban-empty">
+                    <div class="kanban-empty-icon">⚡</div>
+                    <span>Inga pågående möten</span>
+                </div>
+                <div th:each="meeting : ${kanbanData['ONGOING']}"
+                     th:id="'card-' + ${meeting.id()}"
+                     th:data-id="${meeting.id()}"
+                     th:data-status="ONGOING"
+                     class="kanban-card ongoing"
+                     draggable="true"
+                     ondragstart="handleDragStart(event)">
+
+                    <div class="kanban-card-title" th:text="${meeting.title()}"></div>
+                    <div class="kanban-card-meta">
+                        <span>📅
+                            <span th:text="${#temporals.format(meeting.date(), 'dd MMM yyyy')}"></span>
+                        </span>
+                        <span>🕐
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                        </span>
+                        <span>👤 <span th:text="${meeting.organizer()}"></span></span>
+                    </div>
+                    <div class="kanban-card-actions">
+                        <a th:href="@{/meetings/{id}/edit(id=${meeting.id()})}"
+                           class="btn btn-secondary btn-sm">Redigera</a>
+                        <form th:action="@{/meetings/{id}/delete(id=${meeting.id()})}"
+                              method="post"
+                              onsubmit="return confirm('Ta bort mötet?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Ta bort</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KOLUMN: COMPLETED -->
+        <div class="kanban-column"
+             id="col-COMPLETED"
+             data-status="COMPLETED"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+            <div class="kanban-column-header completed">
+                <span class="kanban-column-title completed">Avslutade</span>
+                <span class="kanban-count completed"
+                      th:text="${#lists.size(kanbanData['COMPLETED'])}">0</span>
+            </div>
+
+            <div class="kanban-cards" id="cards-COMPLETED">
+                <div th:if="${#lists.isEmpty(kanbanData['COMPLETED'])}"
+                     class="kanban-empty">
+                    <div class="kanban-empty-icon">✅</div>
+                    <span>Inga avslutade möten</span>
+                </div>
+                <div th:each="meeting : ${kanbanData['COMPLETED']}"
+                     th:id="'card-' + ${meeting.id()}"
+                     th:data-id="${meeting.id()}"
+                     th:data-status="COMPLETED"
+                     class="kanban-card completed"
+                     draggable="true"
+                     ondragstart="handleDragStart(event)">
+
+                    <div class="kanban-card-title" th:text="${meeting.title()}"></div>
+                    <div class="kanban-card-meta">
+                        <span>📅
+                            <span th:text="${#temporals.format(meeting.date(), 'dd MMM yyyy')}"></span>
+                        </span>
+                        <span>🕐
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                        </span>
+                        <span>👤 <span th:text="${meeting.organizer()}"></span></span>
+                    </div>
+                    <div class="kanban-card-actions">
+                        <a th:href="@{/meetings/{id}/edit(id=${meeting.id()})}"
+                           class="btn btn-secondary btn-sm">Redigera</a>
+                        <form th:action="@{/meetings/{id}/delete(id=${meeting.id()})}"
+                              method="post"
+                              onsubmit="return confirm('Ta bort mötet?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Ta bort</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KOLUMN: CANCELLED -->
+        <div class="kanban-column"
+             id="col-CANCELLED"
+             data-status="CANCELLED"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+            <div class="kanban-column-header cancelled">
+                <span class="kanban-column-title cancelled">Inställda</span>
+                <span class="kanban-count cancelled"
+                      th:text="${#lists.size(kanbanData['CANCELLED'])}">0</span>
+            </div>
+
+            <div class="kanban-cards" id="cards-CANCELLED">
+                <div th:if="${#lists.isEmpty(kanbanData['CANCELLED'])}"
+                     class="kanban-empty">
+                    <div class="kanban-empty-icon">🚫</div>
+                    <span>Inga inställda möten</span>
+                </div>
+                <div th:each="meeting : ${kanbanData['CANCELLED']}"
+                     th:id="'card-' + ${meeting.id()}"
+                     th:data-id="${meeting.id()}"
+                     th:data-status="CANCELLED"
+                     class="kanban-card cancelled"
+                     draggable="true"
+                     ondragstart="handleDragStart(event)">
+
+                    <div class="kanban-card-title" th:text="${meeting.title()}"></div>
+                    <div class="kanban-card-meta">
+                        <span>📅
+                            <span th:text="${#temporals.format(meeting.date(), 'dd MMM yyyy')}"></span>
+                        </span>
+                        <span>🕐
+                            <span th:text="${#temporals.format(meeting.startTime(), 'HH:mm')}
+                                          + ' - '
+                                          + ${#temporals.format(meeting.endTime(), 'HH:mm')}">
+                            </span>
+                        </span>
+                        <span>👤 <span th:text="${meeting.organizer()}"></span></span>
+                    </div>
+                    <div class="kanban-card-actions">
+                        <a th:href="@{/meetings/{id}/edit(id=${meeting.id()})}"
+                           class="btn btn-secondary btn-sm">Redigera</a>
+                        <form th:action="@{/meetings/{id}/delete(id=${meeting.id()})}"
+                              method="post"
+                              onsubmit="return confirm('Ta bort mötet?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Ta bort</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DRAG & DROP JAVASCRIPT -->
+    <script>
+        let draggedCard = null;
+
+        function handleDragStart(e) {
+            draggedCard = e.currentTarget;
+            draggedCard.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedCard.dataset.id);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const column = e.currentTarget;
+            column.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        async function handleDrop(e) {
+            e.preventDefault();
+            const column = e.currentTarget;
+            column.classList.remove('drag-over');
+
+            // Spara lokal referens DIREKT — innan dragend kan nolla den
+            const card = draggedCard;
+
+            if (!card) return;
+
+            const meetingId = card.dataset.id;
+            const oldStatus = card.dataset.status;
+            const newStatus = column.dataset.status;
+
+            // Nolla global referens
+            draggedCard = null;
+            card.classList.remove('dragging');
+
+            if (oldStatus === newStatus) return;
+
+            try {
+                const response = await fetch(
+                    `/meetings/${meetingId}/status?status=${newStatus}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                if (response.ok) {
+                    // Uppdatera CSS-klass
+                    card.classList.remove(oldStatus.toLowerCase());
+                    card.classList.add(newStatus.toLowerCase());
+                    card.dataset.status = newStatus;
+
+                    // Flytta kortet
+                    const targetCards = document.getElementById('cards-' + newStatus);
+                    const emptyState = targetCards.querySelector('.kanban-empty');
+                    if (emptyState) emptyState.remove();
+                    targetCards.appendChild(card);
+
+                    // Uppdatera räknare
+                    updateCount(oldStatus);
+                    updateCount(newStatus);
+
+                    showToast('Status uppdaterad! ✓');
+                } else {
+                    console.error('Server svarade:', response.status, response.statusText);
+                    showToast('Något gick fel — försök igen', true);
+                }
+            } catch (err) {
+                console.error('Fetch-fel:', err);
+                showToast('Nätverksfel — försök igen', true);
+            }
+        }
+
+        document.addEventListener('dragend', () => {
+            if (draggedCard) {
+                draggedCard.classList.remove('dragging');
+                draggedCard = null;
+            }
+            document.querySelectorAll('.kanban-column').forEach(col => {
+                col.classList.remove('drag-over');
+            });
+        });
+
+        function updateCount(status) {
+            const cards = document.querySelectorAll(
+                `#cards-${status} .kanban-card`
+            ).length;
+            const counter = document.querySelector(
+                `#col-${status} .kanban-count`
+            );
+            if (counter) counter.textContent = cards;
+        }
+
+        function showToast(message, isError = false) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${isError ? 'toast-danger' : 'toast-success'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+
+</th:block>
+</body>
+</html>
